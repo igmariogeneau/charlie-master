@@ -1,20 +1,18 @@
 //===============================================
 import UIKit
 //===============================================
-class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPickerViewDelegate, UIPickerViewDataSource  {
+class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource  {
     //---------------------
     @IBOutlet weak var tableview: UITableView!
     @IBOutlet weak var textview: UITextView!
     //---------------------
     var aDict: [String: [Any]] = [:]
     //---------------------
-    let nachos = Nachos(image: "nachos.png", price: 4.99, name: "Nachos", choices: ["cheese", "onions"])
-    let soup = Soup(image: "soup.jpg", price: 3.99, name: "Soup", choices: ["Chicken"])
-    let hamburger = Hamburger(image: "hamburger.jpg", price: 11.99, name: "Hamburger", choices: ["cheese", "bacon"])
-    let icecream = IceCream(image: "icecream.jpg", price: 5.99, name: "Ice Cream", choices: ["Vanilla"])
-    let pie = Pie(image: "pie.jpg", price: 6.99, name: "Pie", choices: ["Apple"])
-    //---------------------
-    var menuObjects: [Menu] = []
+    let nachos = Nachos(image: "nachos.png", price: 4.99, name: "Nachos", choices: ["Cheese", "Onions", "Salsa"])
+    let soup = Soup(image: "soup.jpg", price: 3.99, name: "Soup", choices: ["Chicken", "Rice", "Onion", "Pea", "Tomato"])
+    let hamburger = Hamburger(image: "hamburger.jpg", price: 11.99, name: "Hamburger", choices: ["Cheese", "Bacon", "Pickes"])
+    let icecream = IceCream(image: "icecream.jpg", price: 5.99, name: "Ice Cream", choices: ["Vanilla", "Chocolate", "Pistachio", "Lemon"])
+    let pie = Pie(image: "pie.jpg", price: 6.99, name: "Pie", choices: ["Apple", "Cherry", "Blueberry", "Lemon", "Keylime"])
     //---------------------
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -29,46 +27,6 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         aDict["DESSERTS"]?.append(icecream)
         aDict["DESSERTS"]?.append(pie)
         //---------------------
-        parseDict()
-        //---------------------
-    }
-    //---------------------
-    func numberOfComponents(in pickerView: UIPickerView) -> Int {
-        return 1
-    }
-    //---------------------
-    public func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        if pickerView.tag == 400 {
-            let num = menuObjects[0].choices.count
-            return num
-        }
-        return menuObjects[4].choices.count
-    }
-    //---------------------
-    func pickerView(_ pickerView: UIPickerView, viewForRow row: Int, forComponent component: Int, reusing view: UIView?) -> UIView {
-        let pickerLabel = UILabel()
-        
-        var titleData = ""
-
-        if pickerView.tag == 400 {
-            titleData = menuObjects[0].choices[row]
-        } else {
-            titleData = "Hello"
-        }
-        
-        let myTitle = NSAttributedString(string: titleData, attributes: [NSAttributedStringKey.font:UIFont(name: "Helvetica", size: 18.0)!,
- NSAttributedStringKey.foregroundColor:UIColor.white])
-        pickerLabel.textAlignment = NSTextAlignment.center
-        pickerLabel.attributedText = myTitle
-        return pickerLabel
-    }
-    //---------------------
-    func parseDict() {
-        for (_, a) in aDict {
-            for b in a {
-                menuObjects.append(b as! Menu)
-            }
-        }
     }
     //---------------------
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -90,11 +48,6 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         let k = Array(aDict.keys)
         let v = aDict[k[indexPath.section]] as? [Menu]
         
-        if let pickerView = cell?.viewWithTag(400) as? UIPickerView {
-            pickerView.dataSource = self
-            pickerView.delegate = self
-        }
-        
         if let aLabel = cell?.viewWithTag(200) as? UILabel {
             aLabel.text = v![indexPath.row].name
         }
@@ -107,6 +60,14 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             let anImage = UIImage(named: v![indexPath.row].image)
             anImageView.image = anImage
         }
+        
+        if let aTextView = cell?.viewWithTag(400) as? UITextView {
+            var str = "Choices : "
+            for choice in v![indexPath.row].choices {
+                str += "\(choice), "
+            }
+            aTextView.text = doSubstring(originalString: str, theOffset: -2)
+        }
 
         return cell!
     }
@@ -114,6 +75,24 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedCell:UITableViewCell = tableView.cellForRow(at: indexPath as IndexPath)!
         selectedCell.contentView.backgroundColor = UIColor.darkGray
+        
+        let k = Array(aDict.keys)
+        let v = aDict[k[indexPath.section]] as? [Menu]
+        
+        var str = "TYPE : \(k[indexPath.section])\n"
+        str += "NAME : \(v![indexPath.row].name)\n"
+        str += "PRICE : $\(v![indexPath.row].price)\n"
+        str += "CHOICES : "
+        for choice in v![indexPath.row].choices {
+            str += "\(choice), "
+        }
+
+        textview.text = doSubstring(originalString: str, theOffset: -2)
+    }
+    //---------------------
+    func doSubstring(originalString orStr: String, theOffset off: Int) -> String {
+        let endIndex = orStr.index(orStr.endIndex, offsetBy: off)
+        return orStr.substring(to: endIndex)
     }
     //---------------------
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
